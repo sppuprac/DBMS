@@ -1,0 +1,116 @@
+import com.mongodb.MongoClient;
+import com.mongodb.MongoClientURI;
+import com.mongodb.DB;
+import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
+import com.mongodb.BasicDBObject;
+
+import java.util.Scanner;
+import java.util.Formatter;
+
+public class MongoConn {
+    public static MongoClient mongoClient;
+    public static DB dataBase;
+    public static DBCollection Employees;
+
+    public static void DisplayRecords() {
+        DBObject query = new BasicDBObject();
+        DBCursor cur = Employees.find(query);
+        Formatter fmt = new Formatter();
+        System.out.println();
+        fmt.format("%-6s %6s %12s %12s", "ID", "AGE", "First Name", "Last Name");
+        System.out.println(fmt);
+        fmt.close();
+        while (cur.hasNext()) {
+            DBObject nextObj = cur.next();
+            fmt = new Formatter();
+            fmt.format("%-6s %6s %12s %12s", nextObj.get("employeeID"), nextObj.get("age"), nextObj.get("firstName"), nextObj.get("lastName"));
+            System.out.println(fmt);
+            fmt.close();
+        }
+        System.out.println();
+    }
+
+    public static void InsertRecord(String employeeID, String age, String firstName, String lastName) {
+        DBObject obj = new BasicDBObject("employeeID", employeeID)
+            .append("age", age)
+            .append("firstName", firstName)
+            .append("lastName", lastName);
+        Employees.insert(obj);
+    }
+
+    public static void UpdateRecord(String employeeID, String age, String firstName, String lastName) {
+        Formatter fmt;
+
+        DBObject updateQuery = new BasicDBObject("employeeID", employeeID);
+        DBObject updateObj = new BasicDBObject("$set", new BasicDBObject("age", age).append("firstName", firstName).append("lastName", lastName));
+        Employees.update(updateQuery, updateObj);
+
+        DBCursor cur = Employees.find(updateQuery);
+        System.out.println("Updated Employee Data:");
+        DBObject nextObj = cur.one();
+        fmt = new Formatter();
+        fmt.format("%-6s %6s %12s %12s", nextObj.get("employeeID"), nextObj.get("age"), nextObj.get("firstName"), nextObj.get("lastName"));
+        System.out.println(fmt);
+        fmt.close();
+    }
+
+    public static void DeleteRecord(String employeeID) {
+        DBObject query = new BasicDBObject("employeeID", employeeID);
+        Employees.remove(query);
+        System.out.println("Record with Employee Id: " + employeeID + " Deleted successfully!!\n");
+    }
+
+    public static void main(String[] args) {
+        mongoClient = new MongoClient(new MongoClientURI("mongodb://localhost:27017"));
+        dataBase = mongoClient.getDB("JavaMongo-Connection");
+        Employees = dataBase.getCollection("Employees");
+        Scanner sc = new Scanner(System.in);
+        int ch;
+        String employeeID, firstName, lastName, age;
+        do {
+            System.out.println("--------------------------------------------");
+            System.out.println(" 1.Display all Records");
+            System.out.println(" 2.Insert new Record");
+            System.out.println(" 3.Update a Record");
+            System.out.println(" 4.Delete a Record");
+            System.out.println(" 5.Exit");
+            System.out.println("--------------------------------------------");
+            System.out.println(" Enter your Choice");
+            ch = sc.nextInt();
+            switch (ch) {
+                case 1:
+                    DisplayRecords();
+                    break;
+                case 2:
+                    System.out.println("Enter Employee Id: ");
+                    employeeID = sc.next();
+                    System.out.println("Enter Age: ");
+                    age = sc.next();
+                    System.out.println("Enter First Name: ");
+                    firstName = sc.next();
+                    System.out.println("Enter Last Name: ");
+                    lastName = sc.next();
+                    InsertRecord(employeeID, age, firstName, lastName);
+                    break;
+                case 3:
+                    System.out.println("Enter Employee ID to Edit: ");
+                    employeeID = sc.next();
+                    System.out.println("Enter New First name: ");
+                    firstName = sc.next();
+                    System.out.println("Enter New Last name: ");
+                    lastName = sc.next();
+                    System.out.println("Enter New Age: ");
+                    age = sc.next();
+                    UpdateRecord(employeeID, age, firstName, lastName);
+                    break;
+                case 4:
+                    System.out.println("Enter ID of employee to delete: ");
+                    employeeID = sc.next();
+                    DeleteRecord(employeeID);
+                    break;
+            }
+        } while (ch != 5);
+    }
+}

@@ -1,0 +1,25 @@
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoDatabase;
+
+public class MongoDBConnection {
+    public static void main(String[] args) {
+        // MongoDB connection string (replace with your MongoDB server URL)
+        String connectionString = "mongodb://localhost:27017"; // Change this to your MongoDB server URL
+
+        try {
+            // Create a MongoDB client
+            MongoClient mongoClient = MongoClients.create(connectionString);
+
+            // Get a reference to the "test" database
+            MongoDatabase database = mongoClient.getDatabase("test");
+
+            System.out.println("Connected to MongoDB successfully!");
+
+            // Close the MongoDB client when done
+            mongoClient.close();
+        } catch (Exception e) {
+            System.err.println("Failed to connect to MongoDB: " + e);
+        }
+    }
+}
