@@ -1,0 +1,51 @@
+db.createCollection("posts") 
+
+db.posts.insertMany([ { post_text: "This is a sample post.", user_name: "Alice", status: "Active" }, { post_text: "Another post from Alice.", user_name: "Alice", status: "Active" }, { post_text: "John's post.", user_name: "John", status: "Inactive" }, { post_text: "Bob's active post.", user_name: "Bob", status: "Active" }, { post_text: "Alice's third post.", user_name: "Alice", status: "Active" } ]); 
+
+db.posts.find().pretty()
+
+var mapFunction = function() { if (this.status === "Active") { emit(this.user_name, 1); } };
+var reduceFunction = function(key, values) { return Array.sum(values); }; 
+
+ db.posts.mapReduce( mapFunction, reduceFunction, { out: "user_active_post_count" } ); 
+ db.user_active_post_count.find();
+ db.createCollection("books")
+  db.books.insertMany([ { Title: "Book 1", Author_name: "Author A", Borrowed_status: false }, { Title: "Book 2", Author_name: "Author B", Borrowed_status: true }, { Title: "Book 3", Author_name: "Author A", Borrowed_status: true }, { Title: "Book 4", Author_name: "Author C", Borrowed_status: false }, { Title: "Book 5", Author_name: "Author A", Borrowed_status: false }, ]);
+db.books.find().pretty()
+
+ var mapFunction = function() { emit(this.Author_name, { books: [this.Title], borrowed: [] }); }; 
+
+ var reduceFunction = function(key, values) { var reduced = { books: [], borrowed: [] }; values.forEach(function(value) { reduced.books = reduced.books.concat(value.books); reduced.borrowed = reduced.borrowed.concat(value.borrowed); }); return reduced; }; 
+
+ db.books.mapReduce( mapFunction, reduceFunction, { out: "books_by_author" } ); 
+ db.books_by_author.find();
+ db.books_by_author.find().pretty()
+ 
+var mapFunctionBorrowed = function() { if (this.Borrowed_status === true) { emit(this.Author_name, { books: [], borrowed: [this.Title] }); } }; 
+
+ db.books.mapReduce( mapFunctionBorrowed, reduceFunction, { out: "books_borrowed_by_author" } ); 
+
+  db.books_borrowed_by_author.find().pretty();
+db.createCollection("purchase_orders") 
+ db.purchase_orders.insertMany([ { Customer_id: 1, Amount: 500, Status: "Active" }, { Customer_id: 2, Amount: 750, Status: "Inactive" }, { Customer_id: 1, Amount: 300, Status: "Active" }, { Customer_id: 3, Amount: 1000, Status: "Active" }, { Customer_id: 2, AmoAmount: 900, Status: "Active" } ]);
+
+ var mapFunction = function() { if (this.Status === "Active") { emit(this.Customer_id, this.Amount); } };
+
+  var reduceFunction = function(key, values) { return Array.sum(values); };
+
+  db.purchase_orders.mapReduce( mapFunction, reduceFunction, { out: "customer_total_purchase_amount" } );
+ db.createCollection("PersonalInfo") { ok: 1 }
+  db.PersonalInfo.insertMany([ { id: 1, Name: { FirstName: "John", LastName: "Doe" }, Age: 35, Gender: "Male" }, { id: 2, Name: { FirstName: "Alice", LastName: "Johnson" }, Age: 28, Gender: "Female" }, { id: 3, Name: { FirstName: "Bob", LastName: "Smith" }, Age: 40, Gender: "Male" }, { id: 4, Name: { FirstName: "Eve", LastName: "Brown" }, Age: 22, Gender: "Female" }, ]);
+
+ var mapFunction = function() { emit(this.Gender, 1); }; 
+
+ var reduceFunction = function(key, values) { return Array.sum(values); };
+
+  db.PersonalInfo.mapReduce( mapFunction, reduceFunction, { out: "gender_count" } ); { result: 'gender_count', ok: 1 }
+  db.gender_count.find(); [ { _id: 'Male', value: 2 }, { _id: 'Female', value: 2 } ] 
+ db.gender_count.find().pretty();
+ 
+var mapFunctionEldestYoungest = function() { emit(this.Gender, { eldest: this.Age, youngest: this.Age }); };
+
+  var reduceFunctionEldestYoungest = function(key, values) { var reduced = { eldest: values[0].eldest, youngest: values[0].youngest }; values.forEach(function(value) { if (value.eldest > reduced.eldest) { reduced.eldest = value.eldest; } if (value.youngest < reduced.youngest) { reduced.youngest = value.youngest; } }); return reduced; }; 
+ db.PersonalInfo.mapReduce( mapFunctionEldestYoungest, reduceFunctionEldestYoungest, { out: "eldest_youngest_per_gender" } )

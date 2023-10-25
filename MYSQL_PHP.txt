@@ -1,0 +1,41 @@
+<?php
+$servername = "localhost";  // Replace with your MySQL server hostname
+$username = "your_username"; // Replace with your MySQL username
+$password = "your_password"; // Replace with your MySQL password
+$database = "your_database"; // Replace with your MySQL database name
+
+// Create a connection
+$conn = new mysqli($servername, $username, $password, $database);
+
+// Check the connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+} else {
+    echo "Connected successfully to MySQL database!";
+}
+
+// Close the connection when you're done
+$conn->close();
+?>
+
+
+
+
+
+
+// Assuming the connection is already established (as shown in the previous code)
+
+// Perform a simple query
+$sql = "SELECT * FROM your_table";
+$result = $conn->query($sql);
+
+if ($result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        echo "ID: " . $row["id"] . " - Name: " . $row["name"] . "<br>";
+    }
+} else {
+    echo "No records found.";
+}
+
+// Close the connection when you're done
+$conn->close();
