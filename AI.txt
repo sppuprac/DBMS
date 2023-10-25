@@ -1,0 +1,52 @@
+ 
+db.Employee_Data.insertMany([ { Employee_ID: 1, Employee_Name: "Rahul Sharma", Department: "HR", Salary: 60000 }, { Employee_ID: 2, Employee_Name: "Priya Patel", Department: "Finance", Salary: 75000 }, { Employee_ID: 3, Employee_Name: "Amit Singh", Department: "IT", Salary: 80000 }, { Employee_ID: 4, Employee_Name: "Neha Gupta", Department: "Marketing", Salary: 70000 } ]);
+
+db.Employee_Data.aggregate([ { $group: { _id: "$Department", employees: { $push: { Employee_ID: "$Employee_ID", Employee_Name: "$Employee_Name", Salary: "$Salary" } }, avgSalary: { $avg: "$Salary" } } } ]);
+
+db.Employee_Data.aggregate([{$group: {_id: "$Department",count: { $sum: 1 }}, {$project: {Department: "$_id",_id: 0, count: 1}}]);
+
+db.Employee_Data.createIndex({ Employee_ID: 1 });
+
+db.Employee_Data.createIndex({ Employee_Name: 1, Department: 1 });
+
+db.Employee_Data.dropIndex("Employee_ID_1");
+
+db.Library_Data.insertMany([ { Book_ID: 1, Book_Name: "The Immortals of Meluha", Author: "Amish Tripathi", Genre: "Fiction", Publication: "Westland" }, { Book_ID: 2, Book_Name: "2 States: The Story of My Marriage", Author: "Chetan Bhagat", Genre: "Fiction", Publication: "Rupa & Co." }, { Book_ID: 3, Book_Name: "The God of Small Things", Author: "Arundhati Roy", Genre: "Fiction", Publication: "IndiaInk" }, { Book_ID: 4, Book_Name: "The White Tiger", Author: "Aravind Adiga", Genre: "Fiction", Publication: "Free Press" }, { Book_ID: 5, Book_Name: "My Experiments with Truth", Author: "Mahatma Gandhi", Genre: "Autobiography", Publication: "Navajivan Publishing House" } ])
+
+db.Library_Data.aggregate([ { $group: { _id: "$Author", Books: { $sum: 1 } } }, { $project: { Author: "$_id", numBooks: 1, _id: 0 } } ])
+
+db.Library_Data.aggregate([ { $group: { _id: "$Genre", maxPrice: { $max: "$Price" }, books: { $push: "$$ROOT" } } }, { $unwind: "$books" }, { $match: { $expr: { $eq: ["$maxPrice", "$books.Price"] } } }, { $project: { _id: 0, Genre: "$_id", Book_Name: "$books.Book_Name", Author: "$books.Author", Price: "$maxPrice" } } ])
+
+db.Library_Data.aggregate([ { $group: { _id: "$Genre", maxPrice: { $max: "$Price" }, books: { $push: "$$ROOT" } } }, { $unwind: "$books" }, { $match: { $expr: { $eq: ["$maxPrice", "$books.Price"] } } }, { $project: { _id: 0, Genre: "$_id", Book_Name: "$books.Book_Name", Author: "$books.Author", Price: "$maxPrice" } }, { $sort: { Price: 1 } } ])
+
+db.Library_Data.createIndex({ "Book_ID": 1 })
+db.Library_Data.createIndex({ "Book_Name": 1, "Author": 1 })
+
+db.Library_Data.dropIndex("Book_ID_1")
+db.Movies_Data.insertMany([ { Movie_ID: 1, Movie_Name: "Avatar", Director: "James Cameron", Genre: "Science Fiction", BoxOfficeCollection: 2787965087 }, { Movie_ID: 2, Movie_Name: "Titanic", Director: "James Cameron", Genre: "Drama", BoxOfficeCollection: 2208000000 }, { Movie_ID: 3, Movie_Name: "The Avengers", Director: "Joss Whedon", Genre: "Action", BoxOfficeCollection: 1518812988 }, { Movie_ID: 4, Movie_Name: "Inception", Director: "Christopher Nolan", Genre: "Science Fiction", BoxOfficeCollection: 829895144 }, { Movie_ID: 5, Movie_Name: "Forrest Gump", Director: "Robert Zemeckis", Genre: "Drama", BoxOfficeCollection: 678226000 } ])
+
+db.Movies_Data.aggregate([ { $group: { _id: "$Director", Movies: { $sum: 1 } } }, { $project: { Director: "$_id", Movies: 1, _id: 0 } } ])
+
+db.Movies_Data.aggregate([ { $sort: { Genre: 1, BoxOfficeCollection: -1 } }, { $group: { _id: "$Genre", highestGrossingMovie: { $first: "$$ROOT" } } } ])
+
+db.Movies_Data.createIndex({ "Movie_ID": 1 })
+
+db.Movies_Data.createIndex({ "Movie_Name": 1, "Director": 1 })
+
+db.Movies_Data.dropIndex({ "Movie_Name": 1, "Director": 1 })
+
+
+db.Student_Data.insertMany([ { Student_ID: 1, Student_Name: "John Smith", Department: "Computer Science", Marks: 85 }, { Student_ID: 2, Student_Name: "Samantha Patel", Department: "Electrical Engineering", Marks: 92 }, { Student_ID: 3, Student_Name: "Raj Kumar", Department: "Mechanical Engineering", Marks: 78 }, { Student_ID: 4, Student_Name: "Emily Johnson", Department: "Chemistry", Marks: 89 }, { Student_ID: 5, Student_Name: "Amit Sharma", Department: "Physics", Marks: 75 } ])
+
+db.Student_Data.aggregate([ { $group: { _id: "$Department", students: { $push: "$$ROOT" }, avgMarks: { $avg: "$Marks" } } } ])
+
+db.Student_Data.aggregate([ { $group: { _id: "$Department", totalStudents: { $sum: 1 } } } ])
+
+db.Student_Data.aggregate([ { $sort: { Department: 1, Marks: -1 } }, { $group: { _id: "$Department", highestScoringStudent: { $first: "$$ROOT" } } }, { $sort: { "highestScoringStudent.Marks": -1 } } ])
+
+db.Student_Data.createIndex({ "Student_ID": 1 })
+
+db.Student_Data.createIndex({ "Student_Name": 1, "Department": 1 })
+
+db.Student_Data.dropIndex({ "Student_Name": 1, "Department": 1 })
+c
