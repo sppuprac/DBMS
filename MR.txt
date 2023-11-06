@@ -23,6 +23,8 @@ db.books.find().pretty()
  
 var mapFunctionBorrowed = function() { if (this.Borrowed_status === true) { emit(this.Author_name, { books: [], borrowed: [this.Title] }); } }; 
 
+var reduceFunction = function(key, values) { var reduced = { books: [] }; values.forEach(function(value) { reduced.books = reduced.books.concat(value.books); }); return reduced; };
+
  db.books.mapReduce( mapFunctionBorrowed, reduceFunction, { out: "books_borrowed_by_author" } ); 
 
   db.books_borrowed_by_author.find().pretty();
